@@ -1,0 +1,45 @@
+---
+title: "Machine Learning"
+author: "Nikhil Kayal"
+date: "4/30/2017"
+output: html_document
+---
+
+```{r Initial Setup}
+install.packages(c("mlbench","caret","lattice","ggplot2","randomForest","MASS"))
+library(mlbench)
+library(lattice)
+library(ggplot2)
+library(caret)
+library(randomForest)
+library(MASS)
+getwd()
+setwd("/Users/DataScience/Desktop/George Washington University/Coursework/Machine Learning 1/Faith Bradley/Project")
+df <- read.csv("messidor_features.csv")
+```
+
+```{r - Feature Selection }
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(df[,1:19], df[,20], sizes=c(1:19), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
+
+```{r - Rank Features By Importance}
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(ClassLabel~., data=df, method="lvq", preProcess="scale", trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+```
